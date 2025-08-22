@@ -1,0 +1,6 @@
+@RenovationRumble.Verifier_HostAddress = http://localhost:5004
+
+GET {{RenovationRumble.Verifier_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
