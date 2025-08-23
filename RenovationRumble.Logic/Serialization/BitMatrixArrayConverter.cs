@@ -1,107 +1,79 @@
 ﻿namespace RenovationRumble.Logic.Serialization
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text.Json;
-    using System.Text.Json.Serialization;
-    using Board;
+    using Data;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// Serializes BitMatrix as a JSON matrix: [[0,1,0],[1,1,1]]
-    /// Also accepts booleans on read: [[false,true],[true,false]]
+    /// Newtonsoft converter for BitMatrix. JSON shape: [[0,1,0],[1,1,1]]; booleans allowed.
     /// </summary>
-    public sealed class BitMatrixArrayConverter : JsonConverter<BitMatrix>
+    public class BitMatrixArrayConverter : JsonConverter<BitMatrix>
     {
-        public override BitMatrix Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override BitMatrix ReadJson(JsonReader reader, Type objectType, BitMatrix existingValue, bool hasExistingValue, Newtonsoft.Json.JsonSerializer serializer)
         {
-            if (reader.TokenType != JsonTokenType.StartArray)
-                throw new JsonException("Expected start of matrix (array).");
+            if (reader.TokenType != JsonToken.StartArray)
+                throw new JsonSerializationException("Expected start of matrix (array).");
 
-            var rows = new List<List<int>>();
+            var root = JArray.Load(reader);
+            if (root.Count == 0)
+                throw new JsonSerializationException("Matrix must have at least one row.");
 
-            // Read each row
-            while (reader.Read())
-            {
-                if (reader.TokenType == JsonTokenType.EndArray)
-                    break;
-
-                if (reader.TokenType != JsonTokenType.StartArray)
-                    throw new JsonException("Expected row array.");
-
-                var row = new List<int>();
-                while (reader.Read())
-                {
-                    if (reader.TokenType == JsonTokenType.EndArray)
-                        break;
-
-                    switch (reader.TokenType)
-                    {
-                        case JsonTokenType.Number:
-                            var v = reader.GetInt32();
-                            if (v != 0 && v != 1)
-                                throw new JsonException("Matrix values must be 0 or 1.");
-
-                            row.Add(v);
-                            break;
-                        case JsonTokenType.True:
-                            row.Add(1);
-                            break;
-
-                        case JsonTokenType.False:
-                            row.Add(0);
-                            break;
-
-                        default:
-                            throw new JsonException("Matrix values must be numbers 0/1 or booleans.");
-                    }
-                }
-
-                rows.Add(row);
-            }
-
-            if (rows.Count == 0) 
-                throw new JsonException("Matrix must have at least one row.");
-            
-            var w = rows[0].Count;
+            var w = (root[0] as JArray)?.Count ?? 0;
             if (w == 0)
-                throw new JsonException("Matrix rows must be non-empty.");
+                throw new JsonSerializationException("Matrix rows must be non-empty.");
 
-            for (var i = 1; i < rows.Count; i++)
+            // Validate all rows length
+            for (var i = 0; i < root.Count; i++)
             {
-                if (rows[i].Count != w) 
-                    throw new JsonException("All matrix rows must have equal length.");
+                if (!(root[i] is JArray row) || row.Count != w)
+                    throw new JsonSerializationException("All matrix rows must have equal length.");
             }
 
-            var h = rows.Count;
-            if ((long)w * h > BitMatrix.MaxSize) 
-                throw new JsonException("BitMatrix supports up to 64 cells.");
+            var h = root.Count;
+            if ((long)w * h > BitMatrix.MaxSize)
+                throw new JsonSerializationException("BitMatrix supports up to 64 cells.");
 
-            ulong packed = 0;
+            var bits = 0UL;
             for (var y = 0; y < h; y++)
             {
+                var row = (JArray)root[y];
                 for (var x = 0; x < w; x++)
                 {
-                    if (rows[y][x] != 0)
-                        packed |= 1UL << (y * w + x);
+                    var token = row[x];
+
+                    var value = token.Type switch
+                    {
+                        JTokenType.Integer => (int)token,
+                        JTokenType.Boolean => token.Value<bool>() ? 1 : 0,
+                        _ => throw new JsonSerializationException("Matrix values must be numbers 0/1 or booleans.")
+                    };
+
+                    if (value != 0 && value != 1)
+                        throw new JsonSerializationException("Matrix values must be 0 or 1.");
+
+                    if (value != 0)
+                        bits |= 1UL << (y * w + x);
                 }
             }
 
-            return new BitMatrix(w, h, packed);
+            return new BitMatrix((byte)w, (byte)h, bits);
         }
 
-        public override void Write(Utf8JsonWriter writer, BitMatrix value, JsonSerializerOptions options)
+        public override void WriteJson(JsonWriter writer, BitMatrix value, Newtonsoft.Json.JsonSerializer serializer)
         {
             writer.WriteStartArray();
-            
+     
             for (var y = 0; y < value.h; y++)
             {
                 writer.WriteStartArray();
+            
                 for (var x = 0; x < value.w; x++)
-                    writer.WriteNumberValue(value[x, y] ? 1 : 0);
-               
+                    writer.WriteValue(value[x, y] ? 1 : 0);
+                
                 writer.WriteEndArray();
             }
-            
+
             writer.WriteEndArray();
         }
     }

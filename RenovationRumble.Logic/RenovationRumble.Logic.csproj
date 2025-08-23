@@ -3,14 +3,33 @@
     <PropertyGroup>
         <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
         <Nullable>enable</Nullable>
+   	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+    	<NoWarn>1591</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Data\" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.4-beta1" />
     </ItemGroup>
 
+  <Target Name="CopyToUnity" AfterTargets="Build"
+          Condition="'$(TargetFramework)'=='netstandard2.1'">
+    <PropertyGroup>
+      <UnityPluginsDir>$(SolutionDir)..\renovation-rumble-unity\Assets\Plugins\RenovationRumble.Logic\</UnityPluginsDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(UnityPluginsDir)" />
+
     <ItemGroup>
-      <PackageReference Include="System.Text.Json" Version="10.0.0-preview.7.25380.108" />
+      <FilesToCopy Include="$(TargetDir)$(AssemblyName).dll" />
+      <FilesToCopy Include="$(TargetDir)$(AssemblyName).xml"
+                   Condition="Exists('$(TargetDir)$(AssemblyName).xml')" />
+      <FilesToCopy Include="$(TargetDir)$(AssemblyName).pdb"
+                   Condition="'$(Configuration)'=='Debug' And Exists('$(TargetDir)$(AssemblyName).pdb')" />
     </ItemGroup>
+
+    <Copy SourceFiles="@(FilesToCopy)"
+          DestinationFolder="$(UnityPluginsDir)"
+          SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

@@ -1,33 +1,53 @@
-﻿namespace RenovationRumble.Logic.Board
+﻿namespace RenovationRumble.Logic.Data
 {
     using System;
+    using Utility;
 
     /// <summary>
     /// A matrix supporting values of 1 and 0 thanks to using bitwise operations to save space.
     /// </summary>
+    [Serializable]
     public readonly struct BitMatrix
     {
-        public bool this[int x, int y]
+        public struct BitMatrixEnumerator
         {
-            get
+            private readonly byte w;
+            private ulong bitsLeft;
+            private (byte x, byte y) current;
+
+            internal BitMatrixEnumerator(BitMatrix m)
             {
-                if (x < 0 || x >= w)
-                    throw new ArgumentOutOfRangeException(nameof(x));
+                w = m.w;
+                bitsLeft = m.bits;
+                current = default;
+            }
 
-                if (y < 0 || y >= h)
-                    throw new ArgumentOutOfRangeException(nameof(y));
+            public (byte x, byte y) Current => current;
+            public BitMatrixEnumerator GetEnumerator() => this;
 
-                return ((bits >> (y * w + x)) & 1UL) != 0;
+            public bool MoveNext()
+            {
+                if (bitsLeft == 0UL) 
+                    return false;
+
+                // By looking at where the next 1 is, we can easily establish the 1d index
+                var currentFlatIndex = BitOperations.TrailingZeroCount(bitsLeft);
+                bitsLeft &= bitsLeft - 1; // Clear lowest set bit
+
+                var y = (byte)(currentFlatIndex / w);
+                var x = (byte)(currentFlatIndex - y * w);
+                current = (x, y);
+                return true;
             }
         }
 
-        public readonly int w;
-        public readonly int h;
+        public readonly byte w;
+        public readonly byte h;
         public readonly ulong bits;
         
         public const int MaxSize = 64; // ulong is 64 bits
 
-        public BitMatrix(int w, int h, ulong bits)
+        public BitMatrix(byte w, byte h, ulong bits)
         {
             if (w <= 0) 
                 throw new ArgumentOutOfRangeException(nameof(w));
@@ -41,6 +61,25 @@
             this.w = w;
             this.h = h;
             this.bits = bits;
+        }
+        
+        public BitMatrixEnumerator FilledCells()
+        {
+            return new BitMatrixEnumerator(this);
+        }
+
+        public bool this[int x, int y]
+        {
+            get
+            {
+                if (x < 0 || x >= w)
+                    throw new ArgumentOutOfRangeException(nameof(x));
+
+                if (y < 0 || y >= h)
+                    throw new ArgumentOutOfRangeException(nameof(y));
+
+                return ((bits >> (y * w + x)) & 1UL) != 0;
+            }
         }
 
         public BitMatrix Rotate90()
