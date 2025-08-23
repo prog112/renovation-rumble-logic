@@ -6,7 +6,7 @@
     using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// Newtonsoft converter for BitMatrix. JSON shape: [[0,1,0],[1,1,1]]; booleans allowed.
+    /// Newtonsoft converter for BitMatrix. JSON shape: [[0,1,0],[1,1,1]] with booleans allowed.
     /// </summary>
     public class BitMatrixArrayConverter : JsonConverter<BitMatrix>
     {

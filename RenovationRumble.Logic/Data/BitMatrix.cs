@@ -65,6 +65,7 @@
         
         public BitMatrixEnumerator FilledCells()
         {
+            // Use a custom enumerator to avoid heap allocs
             return new BitMatrixEnumerator(this);
         }
 

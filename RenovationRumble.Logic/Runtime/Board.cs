@@ -12,14 +12,14 @@
         /// <summary>
         /// A helper grid array signifying which cell is already filled.
         /// </summary>
-        private readonly BoolGrid fillMap;
+        private readonly Grid fillMap;
 
         public Board(Coords size)
         {
             this.size = size;
 
             placedPieces = new List<BoardPiece>();
-            fillMap = new BoolGrid(size.x, size.y);
+            fillMap = new Grid(size.x, size.y);
         }
         
         public bool CanPlace(PieceDataModel data, Coords position, Orientation orientation)
