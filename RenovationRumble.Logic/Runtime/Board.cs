@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
     using Data;
-    using Data.Matrix;
+    using Primitives;
 
     public sealed class Board
     {

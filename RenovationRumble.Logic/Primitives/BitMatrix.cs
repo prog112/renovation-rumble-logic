@@ -1,7 +1,6 @@
-﻿namespace RenovationRumble.Logic.Data.Matrix
+﻿namespace RenovationRumble.Logic.Primitives
 {
     using System;
-    using RenovationRumble.Logic.Utility;
 
     /// <summary>
     /// A matrix supporting values of 1 and 0 thanks to using bitwise operations to save space.

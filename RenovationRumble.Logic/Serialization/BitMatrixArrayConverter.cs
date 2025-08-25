@@ -2,9 +2,9 @@
 {
     using System;
     using Data;
-    using Data.Matrix;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Primitives;
 
     /// <summary>
     /// Newtonsoft converter for BitMatrix. JSON shape: [[0,1,0],[1,1,1]] with booleans allowed.

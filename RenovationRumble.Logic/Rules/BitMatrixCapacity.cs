@@ -1,5 +1,7 @@
-﻿namespace RenovationRumble.Logic.Data.Matrix
+﻿namespace RenovationRumble.Logic.Rules
 {
+    using Primitives;
+
     /// <summary>
     /// Helper for reasoning about how far a <see cref="BitMatrix"/> can grow along width/height
     /// given the fixed backing capacity (<see cref="BitMatrix.MaxCells"/>).

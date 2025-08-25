@@ -1,10 +1,12 @@
-﻿namespace RenovationRumble.Logic.Data.Matrix
+﻿namespace RenovationRumble.Logic.Rules
 {
+    using Primitives;
+
     /// <summary>
     /// Extensions that don't fit the low-level base <see cref="BitMatrix"/> class that is supposed to be design-agnostic.
     /// These methods below are more particular to the game itself.
     /// </summary>
-    public static class BitMatrixRectExtensions
+    public static class BitMatrixResizing
     {
         public static BitMatrix Shrink(this BitMatrix m, Edge edge)
         {

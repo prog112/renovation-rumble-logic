@@ -1,4 +1,4 @@
-﻿namespace RenovationRumble.Logic.Data
+﻿namespace RenovationRumble.Logic.Primitives
 {
     public enum Edge : byte
     {

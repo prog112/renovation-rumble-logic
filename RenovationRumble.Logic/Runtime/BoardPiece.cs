@@ -1,7 +1,7 @@
 ﻿namespace RenovationRumble.Logic.Runtime
 {
     using Data;
-    using Data.Matrix;
+    using Primitives;
 
     public readonly struct BoardPiece
     {

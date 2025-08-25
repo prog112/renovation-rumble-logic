@@ -1,4 +1,4 @@
-﻿namespace RenovationRumble.Logic.Utility
+﻿namespace RenovationRumble.Logic.Primitives
 {
     /// <summary>
     /// Uses the De Bruijn algorithm to quickly bit scan in O(1) time.
