@@ -1,7 +1,7 @@
-﻿namespace RenovationRumble.Logic.Data
+﻿namespace RenovationRumble.Logic.Data.Matrix
 {
     using System;
-    using Utility;
+    using RenovationRumble.Logic.Utility;
 
     /// <summary>
     /// A matrix supporting values of 1 and 0 thanks to using bitwise operations to save space.
@@ -15,10 +15,10 @@
             private ulong bitsLeft;
             private (byte x, byte y) current;
 
-            internal BitMatrixEnumerator(BitMatrix m)
+            internal BitMatrixEnumerator(BitMatrix matrix)
             {
-                w = m.w;
-                bitsLeft = m.bits;
+                w = matrix.w;
+                bitsLeft = matrix.bits;
                 current = default;
             }
 
@@ -34,6 +34,7 @@
                 var currentFlatIndex = BitOperations.TrailingZeroCount(bitsLeft);
                 bitsLeft &= bitsLeft - 1; // Clear lowest set bit
 
+                // Convert to 2d indices
                 var y = (byte)(currentFlatIndex / w);
                 var x = (byte)(currentFlatIndex - y * w);
                 current = (x, y);
@@ -45,7 +46,7 @@
         public readonly byte h;
         public readonly ulong bits;
         
-        public const int MaxSize = 64; // ulong is 64 bits
+        public const int MaxCells = 64; // ulong is 64 bits
 
         public BitMatrix(byte w, byte h, ulong bits)
         {
@@ -55,8 +56,8 @@
             if (h <= 0)
                 throw new ArgumentOutOfRangeException(nameof(h));
             
-            if ((long)w * h > MaxSize) 
-                throw new ArgumentOutOfRangeException("w*h", $"BitMatrix supports up to {MaxSize} cells.");
+            if ((long)w * h > MaxCells) 
+                throw new ArgumentOutOfRangeException("w*h", $"BitMatrix supports up to {MaxCells} cells.");
            
             this.w = w;
             this.h = h;

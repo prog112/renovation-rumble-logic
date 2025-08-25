@@ -1,6 +1,7 @@
 ﻿namespace RenovationRumble.Logic.Data
 {
     using System;
+    using Matrix;
 
     [Serializable]
     public sealed class PieceDataModel

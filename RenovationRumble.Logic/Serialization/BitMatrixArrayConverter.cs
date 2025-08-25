@@ -2,6 +2,7 @@
 {
     using System;
     using Data;
+    using Data.Matrix;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
@@ -31,7 +32,7 @@
             }
 
             var h = root.Count;
-            if ((long)w * h > BitMatrix.MaxSize)
+            if ((long)w * h > BitMatrix.MaxCells)
                 throw new JsonSerializationException("BitMatrix supports up to 64 cells.");
 
             var bits = 0UL;

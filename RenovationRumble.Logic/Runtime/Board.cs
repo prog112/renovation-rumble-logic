@@ -2,35 +2,34 @@
 {
     using System.Collections.Generic;
     using Data;
+    using Data.Matrix;
 
     public sealed class Board
     {
         private readonly Coords size;
-
         private readonly List<BoardPiece> placedPieces;
+        private readonly Grid fillMap; // A helper grid array signifying which cell is already filled
 
-        /// <summary>
-        /// A helper grid array signifying which cell is already filled.
-        /// </summary>
-        private readonly Grid fillMap;
-
+        private readonly RotationCache rotationCache;
+        
         public Board(Coords size)
         {
             this.size = size;
 
             placedPieces = new List<BoardPiece>();
             fillMap = new Grid(size.x, size.y);
+            rotationCache = new RotationCache();
         }
         
-        public bool CanPlace(PieceDataModel data, Coords position, Orientation orientation)
+        public bool CanPlace(PieceDataModel piece, Coords position, Orientation orientation)
         {
-            var matrix = Rotate(data.DefaultContents, orientation);
+            var matrix = rotationCache.Get(piece, orientation);
             return Validate(matrix, position);
         }
 
-        public bool TryPlace(PieceDataModel data, Coords position, Orientation orientation)
+        public bool TryPlace(PieceDataModel piece, Coords position, Orientation orientation)
         {
-            var matrix = Rotate(data.DefaultContents, orientation);
+            var matrix = rotationCache.Get(piece, orientation);
 
             // First pass: bounds + overlap
             if (!Validate(matrix, position))
@@ -40,7 +39,7 @@
             foreach (var (cx, cy) in matrix.FilledCells())
                 fillMap[position.x + cx, position.y + cy] = true;
 
-            placedPieces.Add(new BoardPiece(data, position, orientation, matrix));
+            placedPieces.Add(new BoardPiece(piece, position, orientation, matrix));
             return true;
         }
 
@@ -61,19 +60,6 @@
             }
 
             return true;
-        }
-
-        private static BitMatrix Rotate(in BitMatrix matrix, Orientation orientation)
-        {
-            // Potentially cache the precomputed rotations if it ever becomes an issue
-            // (it really won't tho lol)
-            return orientation switch
-            {
-                Orientation.Right => matrix.Rotate90(),
-                Orientation.Bottom => matrix.Rotate180(),
-                Orientation.Left => matrix.Rotate270(),
-                _ => matrix
-            };
         }
     }
 }

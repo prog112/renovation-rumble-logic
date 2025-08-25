@@ -1,9 +1,12 @@
 ﻿namespace RenovationRumble.Logic.Data
 {
+    using System;
+
     /// <summary>
     /// A lightweight engine-agnostic struct for board coordinates.
     /// </summary>
-    public readonly struct Coords
+    [Serializable]
+    public readonly struct Coords : IEquatable<Coords>
     {
         public readonly byte x;
         public readonly byte y;
@@ -14,14 +17,14 @@
             this.y = y;
         }
 
-        public static bool operator ==(Coords v1, Coords v2)
+        public static bool operator ==(Coords c1, Coords c2)
         {
-            return v1.x == v2.x && v1.y == v2.y;
+            return c1.x == c2.x && c1.y == c2.y;
         }
 
-        public static bool operator !=(Coords v1, Coords v2)
+        public static bool operator !=(Coords c1, Coords c2)
         {
-            return v1.x != v2.x || v1.y != v2.y;
+            return c1.x != c2.x || c1.y != c2.y;
         }
         
         public override bool Equals(object? obj)
@@ -32,6 +35,11 @@
         public override int GetHashCode()
         {
             return (x << 8) ^ y;
+        }
+
+        public bool Equals(Coords other)
+        {
+            return x == other.x && y == other.y;
         }
     }
 }

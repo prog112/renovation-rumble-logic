@@ -1,9 +1,12 @@
 ﻿namespace RenovationRumble.Logic.Data
 {
+    using System;
+
     /// <summary>
     /// A simple array is faster than multidimensional arrays in .NET.
     /// Exposing an indexer solves the awkward indexing giving us both speed and ease of use.
     /// </summary>
+    [Serializable]
     public sealed class Grid
     {
         public readonly int width;
