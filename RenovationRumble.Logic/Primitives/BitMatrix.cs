@@ -3,7 +3,9 @@
     using System;
 
     /// <summary>
-    /// A matrix supporting values of 1 and 0 thanks to using bitwise operations to save space.
+    /// A stack-allocated rectangular matrix supporting values of 1 and 0,
+    /// stored compactly as a 64-bit bitfield in row-major order.
+    /// This type avoids the overhead of bool arrays, giving us zero heap allocations.
     /// </summary>
     [Serializable]
     public readonly struct BitMatrix

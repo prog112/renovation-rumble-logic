@@ -1,8 +1,8 @@
-﻿namespace RenovationRumble.Logic.Runtime
+﻿namespace RenovationRumble.Logic.Runtime.Board
 {
     using System.Collections.Generic;
-    using Data;
-    using Primitives;
+    using RenovationRumble.Logic.Data;
+    using RenovationRumble.Logic.Primitives;
 
     public sealed class Board
     {
