@@ -1,5 +1,7 @@
 ﻿namespace RenovationRumble.Logic.Data.Commands
 {
+    using Logic.Serialization;
+
     public enum Command : byte
     {
         Place,
@@ -7,6 +9,7 @@
         Shrink,
     }
     
+    [JsonDiscriminatedUnion(typeof(Command), nameof(Command))]
     public abstract class CommandDataModel
     {
         /// <summary>

@@ -33,11 +33,8 @@ namespace RenovationRumble.Logic.Serialization
             settings.Converters.Add(new StringEnumConverter());
             settings.Converters.Add(new BitMatrixArrayConverter());
             
-            // Handle CommandDataModel polymorphism with a safe AOT-friendly converter
-            settings.Converters.Add(new EnumDiscriminatedConverter<CommandDataModel, Command>(
-                discriminatorName: "type",
-                factories: CommandFactories.Factories,
-                getType: x => x.Command));
+            // Handle polymorphism with a safe AOT-friendly converter
+            DiscriminatedUnionRegistry.RegisterAll(settings);
         }
 
         public string Serialize<T>(T data)
