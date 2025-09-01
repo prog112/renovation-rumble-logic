@@ -1,16 +1,14 @@
 ﻿namespace RenovationRumble.Logic.Runtime.Board
 {
     using System.Collections.Generic;
-    using RenovationRumble.Logic.Data;
-    using RenovationRumble.Logic.Primitives;
+    using Primitives;
 
     public sealed class Board
     {
         private readonly Coords size;
+        
         private readonly List<BoardPiece> placedPieces;
         private readonly Grid fillMap; // A helper grid array signifying which cell is already filled
-
-        private readonly RotationCache rotationCache;
         
         public Board(Coords size)
         {
@@ -18,48 +16,32 @@
 
             placedPieces = new List<BoardPiece>();
             fillMap = new Grid(size.x, size.y);
-            rotationCache = new RotationCache();
+        }
+
+        public bool IsFilled(Coords position)
+        {
+            return fillMap[position.x, position.y];
         }
         
-        public bool CanPlace(PieceDataModel piece, Coords position, Orientation orientation)
+        public bool IsWithinBounds(Coords position)
         {
-            var matrix = rotationCache.Get(piece, orientation);
-            return Validate(matrix, position);
+            return position.x < size.x && position.y < size.y;
         }
 
-        public bool TryPlace(PieceDataModel piece, Coords position, Orientation orientation)
+        public void Fill(Coords position, bool value)
         {
-            var matrix = rotationCache.Get(piece, orientation);
-
-            // First pass: bounds + overlap
-            if (!Validate(matrix, position))
-                return false;
-
-            // Second pass: cache the fill
-            foreach (var (cx, cy) in matrix.FilledCells())
-                fillMap[position.x + cx, position.y + cy] = true;
-
-            placedPieces.Add(new BoardPiece(piece, position, orientation, matrix));
-            return true;
+            fillMap[position.x, position.y] = value;
         }
 
-        private bool Validate(in BitMatrix matrix, in Coords position)
+        public void Fill(in BitMatrix matrix, Coords origin)
         {
             foreach (var (cx, cy) in matrix.FilledCells())
-            {
-                var gx = position.x + cx;
-                var gy = position.y + cy;
+                fillMap[origin.x + cx, origin.y + cy] = true;
+        }
 
-                // Bounds
-                if (gx >= size.x || gy >= size.y)
-                    return false;
-
-                // Overlap
-                if (fillMap[gx, gy])
-                    return false;
-            }
-
-            return true;
+        public void AddPiece(BoardPiece piece)
+        {
+            placedPieces.Add(piece);
         }
     }
 }

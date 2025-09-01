@@ -17,6 +17,12 @@
             this.y = y;
         }
 
+        public Coords(int x, int y)
+        {
+            this.x = (byte)x;
+            this.y = (byte)y;
+        }
+
         public static bool operator ==(Coords c1, Coords c2)
         {
             return c1.x == c2.x && c1.y == c2.y;
@@ -40,6 +46,11 @@
         public bool Equals(Coords other)
         {
             return x == other.x && y == other.y;
+        }
+        
+        public override string ToString()
+        {
+            return $"({x},{y})";
         }
     }
 }

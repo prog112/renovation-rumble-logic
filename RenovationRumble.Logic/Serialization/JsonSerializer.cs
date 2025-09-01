@@ -22,7 +22,7 @@ namespace RenovationRumble.Logic.Serialization
         {
             settings = new JsonSerializerSettings
             {
-                // SECURITY: keep None for untrusted data
+                // Keep None for untrusted data for security
                 TypeNameHandling = TypeNameHandling.None,
                 Formatting = isHumanReadable ? Formatting.Indented : Formatting.None,
                 ContractResolver = new WritablePropertiesOnlyResolver(),
@@ -33,7 +33,7 @@ namespace RenovationRumble.Logic.Serialization
             settings.Converters.Add(new StringEnumConverter());
             settings.Converters.Add(new BitMatrixArrayConverter());
             
-            // Handle polymorphism with a safe AOT-friendly converter
+            // Handle polymorphism with a safe IL2CPP-friendly converter
             DiscriminatedUnionRegistry.RegisterAll(settings);
         }
 

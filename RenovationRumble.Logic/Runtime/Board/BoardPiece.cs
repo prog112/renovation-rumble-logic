@@ -1,7 +1,7 @@
 ﻿namespace RenovationRumble.Logic.Runtime.Board
 {
-    using RenovationRumble.Logic.Data;
-    using RenovationRumble.Logic.Primitives;
+    using Data;
+    using Primitives;
 
     public readonly struct BoardPiece
     {

@@ -8,19 +8,15 @@
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class JsonDiscriminatedUnionAttribute : Attribute
-    {
-        public Type EnumType { get; }
-        public string EnumProperty { get; }
-        public string Discriminator { get; }
-        
+    {        
         /// <param name="enumType">The enum used as discriminator.</param>
         /// <param name="enumProperty">Name of the base property that returns the enum.</param>
         /// <param name="discriminator">JSON field name with the default being 'type'.</param>
+        // ReSharper disable UnusedParameter.Local
         public JsonDiscriminatedUnionAttribute(Type enumType, string enumProperty, string discriminator = "type")
         {
-            EnumType = enumType; 
-            EnumProperty = enumProperty;
-            Discriminator = discriminator;
+            // No need to do anything with the args as they get intercepted by the Roselyn analyzer.
+            // See the generated DiscriminatedUnionRegistry class.
         }
     }
 }

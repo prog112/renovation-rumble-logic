@@ -1,6 +1,7 @@
 ﻿namespace RenovationRumble.Logic.Runtime.Runner
 {
     using Board;
+    using Catalog;
     using Data;
     using Data.Commands;
     using Executors;
@@ -12,12 +13,12 @@
         private readonly Context context;
         private readonly CommandRunner commandRunner;
         
-        public GameRunner(ILogicLogger logicLogger = null)
+        public GameRunner(GameData gameData, ILogicLogger logicLogger = null)
         {
             context = new Context
             {
                 Logger = logicLogger ?? NullLogger.Logger,
-                RotationCache = new RotationCache()
+                GameData = gameData 
             };
             
             commandRunner = new CommandRunner();

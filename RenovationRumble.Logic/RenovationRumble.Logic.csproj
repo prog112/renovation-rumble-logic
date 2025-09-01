@@ -15,6 +15,9 @@
                     OutputItemType="Analyzer"
                     ReferenceOutputAssembly="false" />
 </ItemGroup>
+<ItemGroup>
+  <Folder Include="Utility\Collections\" />
+</ItemGroup>
 
 
   <Target Name="CopyToUnity" AfterTargets="Build"

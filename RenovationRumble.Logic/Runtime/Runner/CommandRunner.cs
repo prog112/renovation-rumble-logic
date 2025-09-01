@@ -34,9 +34,13 @@
         }
 
         private readonly Dictionary<Type, IAdapter> executors = new Dictionary<Type, IAdapter>();
+        private readonly Dictionary<Type, IAdapter> resolutionCache = new Dictionary<Type, IAdapter>();
         
         public void Register<T>(ICommandExecutor<T> executor) where T : CommandDataModel
         {
+            if (executor is null)
+                throw new ArgumentNullException(nameof(executor));
+            
             executors.TryAdd(typeof(T), new Adapter<T>(executor));
         }
         
@@ -48,16 +52,17 @@
             if(command == null)
                 return CommandResult.Fail(CommandError.InvalidCommand, "command is null");
             
-            if (!executors.TryGetValue(command.GetType(), out var executor))
-                return CommandResult.Fail(CommandError.InvalidCommand, "no executor found");
+            if (!TryResolveAdapter(command.GetType(), out var adapter))
+                return CommandResult.Fail(CommandError.InvalidCommand, "no compatible executor found");
 
             bool canApply;
             try
             {
-                canApply = executor.CanApply(in context, command);
+                canApply = adapter.CanApply(in context, command);
             }
             catch (Exception e)
             {
+                context.Logger.LogError($"Validation exception during command {command.GetType().Name}: {e.Message}");
                 return CommandResult.Fail(CommandError.ValidationException, e.Message);
             }
             
@@ -66,14 +71,39 @@
 
             try
             {
-                executor.Apply(context, command);
+                adapter.Apply(context, command);
             }
             catch (Exception e)
             {
+                context.Logger.LogError($"Execution exception during command {command.GetType().Name}: {e.Message}");
                 return CommandResult.Fail(CommandError.ApplyException, e.Message);
             }
             
             return CommandResult.Ok();
+        }
+        
+        private bool TryResolveAdapter(Type commandType, out IAdapter adapter)
+        {
+            // Check if we have an exact match
+            if (executors.TryGetValue(commandType, out adapter))
+                return true;
+
+            if (resolutionCache.TryGetValue(commandType, out adapter))
+                return true;
+
+            // Walk base types to find the nearest parent
+            var type = commandType.BaseType;
+            while (type != null && typeof(CommandDataModel).IsAssignableFrom(type))
+            {
+                if (executors.TryGetValue(type, out adapter))
+                {
+                    resolutionCache[commandType] = adapter;
+                    return true;
+                }
+                type = type.BaseType;
+            }
+
+            return false;
         }
     }
 }
