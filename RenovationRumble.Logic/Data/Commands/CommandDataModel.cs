@@ -1,27 +1,17 @@
 ﻿namespace RenovationRumble.Logic.Data.Commands
 {
-    using Primitives;
-
+    public enum Command : byte
+    {
+        Place,
+        Grow,
+        Shrink,
+    }
+    
     public abstract class CommandDataModel
     {
-    }
-
-    public sealed class PlaceCommandDataModel : CommandDataModel
-    {
-        public ushort PieceId { get; set; }
-        public Coords Coords { get; set; }
-        public Orientation Orientation { get; set; }
-    }
-
-    public sealed class GrowCommandDataModel : CommandDataModel
-    {
-        public int PieceBoardIndex { get; set; }
-        public Edge Edge { get; set; }
-    }
-
-    public sealed class ShrinkCommandDataModel : CommandDataModel
-    {
-        public int PieceBoardIndex { get; set; }
-        public Edge Edge { get; set; }
+        /// <summary>
+        /// Must be provided by derived classes to safely resolve the command type in serialization.
+        /// </summary>
+        public abstract Command Command { get; }
     }
 }

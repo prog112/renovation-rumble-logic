@@ -10,6 +10,12 @@
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4-beta1" />
     </ItemGroup>
+<ItemGroup>
+  <ProjectReference Include="..\RenovationRumble.Logic.Generators\RenovationRumble.Logic.Generators.csproj"
+                    OutputItemType="Analyzer"
+                    ReferenceOutputAssembly="false" />
+</ItemGroup>
+
 
   <Target Name="CopyToUnity" AfterTargets="Build"
           Condition="'$(TargetFramework)'=='netstandard2.1'">

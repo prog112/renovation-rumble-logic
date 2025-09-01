@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "DebugRoslynSourceGenerator": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../RenovationRumble.Logic.Generators.Sample/RenovationRumble.Logic.Generators.Sample.csproj"
+    }
+  }
+}

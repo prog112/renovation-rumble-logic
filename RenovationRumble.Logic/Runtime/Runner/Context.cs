@@ -6,6 +6,8 @@
     public sealed class Context
     {
         public ILogicLogger Logger { get; set; }
+        public RotationCache RotationCache { get; set; }
+        
         public Board Board { get; set; }
     }
 }

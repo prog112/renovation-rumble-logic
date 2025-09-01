@@ -16,7 +16,8 @@
         {
             context = new Context
             {
-                Logger = logicLogger ?? NullLogger.Logger
+                Logger = logicLogger ?? NullLogger.Logger,
+                RotationCache = new RotationCache()
             };
             
             commandRunner = new CommandRunner();

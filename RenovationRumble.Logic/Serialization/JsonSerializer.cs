@@ -4,7 +4,9 @@ namespace RenovationRumble.Logic.Serialization
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using Data.Commands;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
 
     /// <summary>
@@ -15,22 +17,27 @@ namespace RenovationRumble.Logic.Serialization
         private readonly JsonSerializerSettings settings;
 
         private static readonly Encoding _Utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-
-        /// <param name="allowPolymorphism">If true, enables TypeNameHandling.Auto (ONLY for trusted data).</param>
-        /// <param name="isHumanReadable">Pretty print for debugging.</param>
-        public JsonSerializer(bool allowPolymorphism = false, bool isHumanReadable = false)
+        
+        public JsonSerializer(bool isHumanReadable = false)
         {
             settings = new JsonSerializerSettings
             {
                 // SECURITY: keep None for untrusted data
-                TypeNameHandling = allowPolymorphism ? TypeNameHandling.Auto : TypeNameHandling.None,
+                TypeNameHandling = TypeNameHandling.None,
                 Formatting = isHumanReadable ? Formatting.Indented : Formatting.None,
                 ContractResolver = new WritablePropertiesOnlyResolver(),
                 NullValueHandling = NullValueHandling.Ignore
             };
 
             // Global converters
+            settings.Converters.Add(new StringEnumConverter());
             settings.Converters.Add(new BitMatrixArrayConverter());
+            
+            // Handle CommandDataModel polymorphism with a safe AOT-friendly converter
+            settings.Converters.Add(new EnumDiscriminatedConverter<CommandDataModel, Command>(
+                discriminatorName: "type",
+                factories: CommandFactories.Factories,
+                getType: x => x.Command));
         }
 
         public string Serialize<T>(T data)
