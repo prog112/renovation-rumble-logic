@@ -7,7 +7,7 @@
 
     public sealed class PlaceExecutor : ICommandExecutor<PlaceCommandDataModel>
     {
-        public bool CanApply(in Context context, PlaceCommandDataModel command)
+        public bool CanApply(in ReadOnlyContext context, PlaceCommandDataModel command)
         {
             var piece = context.Data.GetPiece(command.PieceId);
             var matrix = context.Data.RotationCache.Get(piece, command.Orientation);

@@ -8,7 +8,7 @@
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     /// <summary>
-    /// Scans for base classes annotated with [JsonDiscriminatedUnion()] and generates an appropriate converter.
+    /// Scans for base classes annotated with [DiscriminatedUnion()] and generates an appropriate converter.
     /// </summary>
     [Generator(LanguageNames.CSharp)]
     public sealed class DiscriminatedUnionGenerator : ISourceGenerator

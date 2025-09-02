@@ -8,7 +8,7 @@
     /// </summary>
     public interface ICommandExecutor<in TCommand> where TCommand : CommandDataModel
     {
-        bool CanApply(in Context context, TCommand command);
+        bool CanApply(in ReadOnlyContext context, TCommand command);
         void Apply(Context context, TCommand command);
     }
 }

@@ -3,7 +3,13 @@
     using System.Collections.Generic;
     using Primitives;
 
-    public sealed class Board
+    public interface IReadOnlyBoard
+    {
+        bool IsFilled(Coords position);
+        bool IsWithinBounds(Coords position);
+    }
+    
+    public sealed class Board : IReadOnlyBoard
     {
         private readonly Coords size;
         

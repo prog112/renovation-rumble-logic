@@ -9,7 +9,7 @@
     {
         private interface IAdapter
         {
-            bool CanApply(in Context context, CommandDataModel command);
+            bool CanApply(in ReadOnlyContext context, CommandDataModel command);
             void Apply(Context context, CommandDataModel command);
         }
 
@@ -22,7 +22,7 @@
                 this.executor = executor;
             }
                 
-            public bool CanApply(in Context context, CommandDataModel command)
+            public bool CanApply(in ReadOnlyContext context, CommandDataModel command)
             {
                 return executor.CanApply(in context, (T)command);
             }
@@ -58,7 +58,7 @@
             bool canApply;
             try
             {
-                canApply = adapter.CanApply(context, command);
+                canApply = adapter.CanApply(new ReadOnlyContext(context), command);
             }
             catch (Exception e)
             {

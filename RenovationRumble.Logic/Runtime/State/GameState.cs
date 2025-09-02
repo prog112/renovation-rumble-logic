@@ -2,8 +2,14 @@
 {
     using Board;
 
-    public sealed class GameState
+    public interface IReadOnlyGameState
+    {
+        IReadOnlyBoard Board { get; }
+    }
+    
+    public sealed class GameState : IReadOnlyGameState
     {
         public Board Board { get; set; }
+        IReadOnlyBoard IReadOnlyGameState.Board => Board;
     }
 }
