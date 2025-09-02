@@ -13,7 +13,7 @@
     [Generator(LanguageNames.CSharp)]
     public sealed class DiscriminatedUnionGenerator : ISourceGenerator
     {
-        private const string AttributeFullName = "RenovationRumble.Logic.Serialization.JsonDiscriminatedUnionAttribute";
+        private const string AttributeFullName = "RenovationRumble.Logic.Serialization.DiscriminatedUnionAttribute";
 
         public void Initialize(GeneratorInitializationContext context)
         {
@@ -193,7 +193,7 @@
             sb.AppendLine("            };");
             sb.AppendLine();
             sb.AppendLine($"        public static readonly JsonConverter<{baseName}> Converter =");
-            sb.AppendLine($"            new RenovationRumble.Logic.Serialization.EnumDiscriminatedConverter<{baseName}, {enumNameFull}>(");
+            sb.AppendLine($"            new RenovationRumble.Logic.Serialization.DiscriminatedUnionConverter<{baseName}, {enumNameFull}>(");
             sb.AppendLine($"                discriminatorName: \"{discriminator}\",");
             sb.AppendLine("                factories: Factories,");
             sb.AppendLine($"                getType: x => x.{enumPropertyName});");

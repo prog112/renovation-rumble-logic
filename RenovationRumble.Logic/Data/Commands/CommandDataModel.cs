@@ -9,7 +9,7 @@
         Shrink,
     }
     
-    [JsonDiscriminatedUnion(typeof(Command), nameof(Command))]
+    [DiscriminatedUnion(typeof(Command), nameof(Command))]
     public abstract class CommandDataModel
     {
         /// <summary>

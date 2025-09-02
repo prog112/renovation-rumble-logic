@@ -58,7 +58,7 @@
                 throw new ArgumentOutOfRangeException(nameof(h));
             
             if ((long)w * h > MaxCells) 
-                throw new ArgumentOutOfRangeException(null, $"BitMatrix supports up to {MaxCells} cells. Got: {{w}}×{{h}} = {{w * h}}.");
+                throw new ArgumentOutOfRangeException(null, $"BitMatrix supports up to {MaxCells} cells. Got: {w}×{h} = {(long)w * h}.");
            
             this.w = w;
             this.h = h;

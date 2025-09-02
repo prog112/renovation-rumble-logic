@@ -1,7 +1,6 @@
 ﻿namespace RenovationRumble.Logic.Serialization
 {
     using System;
-    using Data;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Primitives;
@@ -9,8 +8,25 @@
     /// <summary>
     /// Newtonsoft converter for BitMatrix. JSON shape: [[0,1,0],[1,1,1]] with booleans allowed.
     /// </summary>
-    public class BitMatrixArrayConverter : JsonConverter<BitMatrix>
+    public class BitMatrixConverter : JsonConverter<BitMatrix>
     {
+        public override void WriteJson(JsonWriter writer, BitMatrix value, Newtonsoft.Json.JsonSerializer serializer)
+        {
+            writer.WriteStartArray();
+     
+            for (var y = 0; y < value.h; y++)
+            {
+                writer.WriteStartArray();
+            
+                for (var x = 0; x < value.w; x++)
+                    writer.WriteValue(value[x, y] ? 1 : 0);
+                
+                writer.WriteEndArray();
+            }
+
+            writer.WriteEndArray();
+        }
+
         public override BitMatrix ReadJson(JsonReader reader, Type objectType, BitMatrix existingValue, bool hasExistingValue, Newtonsoft.Json.JsonSerializer serializer)
         {
             if (reader.TokenType != JsonToken.StartArray)
@@ -59,23 +75,6 @@
             }
 
             return new BitMatrix((byte)w, (byte)h, bits);
-        }
-
-        public override void WriteJson(JsonWriter writer, BitMatrix value, Newtonsoft.Json.JsonSerializer serializer)
-        {
-            writer.WriteStartArray();
-     
-            for (var y = 0; y < value.h; y++)
-            {
-                writer.WriteStartArray();
-            
-                for (var x = 0; x < value.w; x++)
-                    writer.WriteValue(value[x, y] ? 1 : 0);
-                
-                writer.WriteEndArray();
-            }
-
-            writer.WriteEndArray();
         }
     }
 }

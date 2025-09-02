@@ -31,7 +31,8 @@ namespace RenovationRumble.Logic.Serialization
 
             // Global converters
             settings.Converters.Add(new StringEnumConverter());
-            settings.Converters.Add(new BitMatrixArrayConverter());
+            settings.Converters.Add(new BitMatrixConverter());
+            settings.Converters.Add(new CoordsConverter());
             
             // Handle polymorphism with a safe IL2CPP-friendly converter
             DiscriminatedUnionRegistry.RegisterAll(settings);
