@@ -1,9 +1,5 @@
 ﻿namespace RenovationRumble.Logic.Primitives
 {
-    /// <summary>
-    /// Uses the De Bruijn algorithm to quickly bit scan in O(1) time.
-    /// See: https://stackoverflow.com/questions/21888140/de-bruijn-algorithm-binary-digit-count-64bits-c-sharp 
-    /// </summary>
     public static class BitOperations
     {
         private static readonly int[] _Index64 =
@@ -20,6 +16,11 @@
 
         private const ulong Multiplicator = 0x022fdd63cc95386dUL;
 
+        /// <summary>
+        /// Returns the number of consecutive zero bits starting from the least significant bit (LSB).
+        /// Uses the De Bruijn algorithm to quickly bit scan in O(1) time.
+        /// See: https://stackoverflow.com/questions/21888140/de-bruijn-algorithm-binary-digit-count-64bits-c-sharp 
+        /// </summary>
         public static int TrailingZeroCount(ulong v)
         {
             // Zero has all 64 bits set as 0
@@ -27,6 +28,22 @@
                 return 64;
             
             return _Index64[((ulong)((long)v & -(long)v) * Multiplicator) >> 58];
+        }
+        
+        /// <summary>
+        /// Counts the number of set bits (1s) in the given 64-bit unsigned integer.
+        /// Uses the SWAR (SIMD Within A Register) bit counting algorithm.
+        /// See: https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
+        /// </summary>
+        public static int PopCount(ulong v)
+        {
+            v = v - ((v >> 1) & 0x5555_5555_5555_5555UL);
+            v = (v & 0x3333_3333_3333_3333UL) + ((v >> 2) & 0x3333_3333_3333_3333UL);
+            v = (v + (v >> 4)) & 0x0F0F_0F0F_0F0F_0F0FUL;
+            v = v + (v >> 8);
+            v = v + (v >> 16);
+            v = v + (v >> 32);
+            return (int)(v & 0x7F);
         }
     }
 }
