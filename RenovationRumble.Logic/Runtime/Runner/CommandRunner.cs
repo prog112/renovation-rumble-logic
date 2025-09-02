@@ -34,16 +34,16 @@
         }
 
         private readonly Dictionary<Type, IAdapter> executors = new Dictionary<Type, IAdapter>();
-        private readonly Dictionary<Type, IAdapter> resolutionCache = new Dictionary<Type, IAdapter>();
-        
+
         public void Register<T>(ICommandExecutor<T> executor) where T : CommandDataModel
         {
             if (executor is null)
                 throw new ArgumentNullException(nameof(executor));
-            
-            executors.TryAdd(typeof(T), new Adapter<T>(executor));
+
+            if (!executors.TryAdd(typeof(T), new Adapter<T>(executor)))
+                throw new InvalidOperationException($"Executor for {typeof(T).Name} already registered.");
         }
-        
+
         public CommandResult TryApplyCommand(in Context context, CommandDataModel command)
         {
             if(context == null)
@@ -58,7 +58,7 @@
             bool canApply;
             try
             {
-                canApply = adapter.CanApply(in context, command);
+                canApply = adapter.CanApply(context, command);
             }
             catch (Exception e)
             {
@@ -84,11 +84,8 @@
         
         private bool TryResolveAdapter(Type commandType, out IAdapter adapter)
         {
-            // Check if we have an exact match
+            // Check the cache first
             if (executors.TryGetValue(commandType, out adapter))
-                return true;
-
-            if (resolutionCache.TryGetValue(commandType, out adapter))
                 return true;
 
             // Walk base types to find the nearest parent
@@ -97,7 +94,8 @@
             {
                 if (executors.TryGetValue(type, out adapter))
                 {
-                    resolutionCache[commandType] = adapter;
+                    // Save into our cache 
+                    executors[commandType] = adapter;
                     return true;
                 }
                 type = type.BaseType;

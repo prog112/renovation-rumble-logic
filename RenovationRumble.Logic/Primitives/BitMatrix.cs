@@ -33,7 +33,7 @@
 
                 // By looking at where the next 1 is, we can easily establish the 1d index
                 var currentFlatIndex = BitOperations.TrailingZeroCount(bitsLeft);
-                bitsLeft &= bitsLeft - 1; // Clear lowest set bit
+                bitsLeft &= bitsLeft - 1; // Clear the lowest set bit
 
                 // Convert to 2d indices
                 var y = (byte)(currentFlatIndex / w);
@@ -58,7 +58,7 @@
                 throw new ArgumentOutOfRangeException(nameof(h));
             
             if ((long)w * h > MaxCells) 
-                throw new ArgumentOutOfRangeException("w*h", $"BitMatrix supports up to {MaxCells} cells.");
+                throw new ArgumentOutOfRangeException(null, $"BitMatrix supports up to {MaxCells} cells. Got: {{w}}×{{h}} = {{w * h}}.");
            
             this.w = w;
             this.h = h;

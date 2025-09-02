@@ -22,8 +22,9 @@
 
         public static int TrailingZeroCount(ulong v)
         {
+            // Zero has all 64 bits set as 0
             if (v == 0) 
-                return -1;
+                return 64;
             
             return _Index64[((ulong)((long)v & -(long)v) * Multiplicator) >> 58];
         }
