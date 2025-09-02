@@ -7,6 +7,7 @@
     using Executors;
     using Logger;
     using Primitives;
+    using State;
 
     public sealed class GameRunner
     {
@@ -18,7 +19,7 @@
             context = new Context
             {
                 Logger = logicLogger ?? NullLogger.Logger,
-                GameData = gameData 
+                Data = gameData 
             };
             
             commandRunner = new CommandRunner();
@@ -27,8 +28,11 @@
 
         public void StartMatch(MatchDataModel match)
         {
-            // Create a new board
-            context.Board = new Board(new Coords(match.BoardWidth, match.BoardHeight));
+            // Create a new game state
+            context.State = new GameState
+            {
+                Board = new Board(new Coords(match.BoardWidth, match.BoardHeight))
+            };
         }
         
         public CommandResult TryApplyCommand(CommandDataModel command)

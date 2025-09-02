@@ -46,7 +46,7 @@
 
         public CommandResult TryApplyCommand(in Context context, CommandDataModel command)
         {
-            if(context == null)
+            if(context == null || context.State == null)
                 return CommandResult.Fail(CommandError.InvalidCommand, "game match not started");
             
             if(command == null)
