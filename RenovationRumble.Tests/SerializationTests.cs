@@ -6,7 +6,7 @@ namespace RenovationRumble.Tests
     using Newtonsoft.Json;
     using JsonSerializer = Logic.Serialization.JsonSerializer;
 
-    public class RenovationRumbleTests
+    public class SerializationTests
     {
         private static readonly JsonSerializer _Serializer = new(isHumanReadable: true);
 
