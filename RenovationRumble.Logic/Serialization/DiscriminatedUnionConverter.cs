@@ -18,10 +18,7 @@
         private readonly IReadOnlyDictionary<TEnum, Func<TBase>> factories;
         private readonly Func<TBase, TEnum> getType;
 
-        public DiscriminatedUnionConverter(
-            string discriminatorName,
-            IReadOnlyDictionary<TEnum, Func<TBase>> factories,
-            Func<TBase, TEnum> getType)
+        public DiscriminatedUnionConverter(string discriminatorName, IReadOnlyDictionary<TEnum, Func<TBase>> factories, Func<TBase, TEnum> getType)
         {
             this.discriminatorName = discriminatorName ?? throw new ArgumentNullException(nameof(discriminatorName));
             this.factories = factories ?? throw new ArgumentNullException(nameof(factories));
@@ -30,7 +27,11 @@
 
         public override void WriteJson(JsonWriter writer, TBase value, Newtonsoft.Json.JsonSerializer serializer)
         {
-            if (value is null) { writer.WriteNull(); return; }
+            if (value is null)
+            {
+                writer.WriteNull();
+                return;
+            }
 
             var enumValue = getType(value);
 
@@ -50,7 +51,6 @@
                     continue;
 
                 var propValue = prop.ValueProvider.GetValue(value);
-
                 if (propValue == null && serializer.NullValueHandling == NullValueHandling.Ignore)
                     continue;
 
@@ -80,19 +80,18 @@
             switch (token.Type)
             {
                 case JTokenType.String:
-                {
-                    var s = token.Value<string>();
-                    if (!Enum.TryParse(typeof(TEnum), s, ignoreCase: true, out var parsed))
-                        throw new JsonSerializationException($"Unknown {typeof(TEnum).Name} '{s}'.");
-                    type = (TEnum)parsed!;
+                    var text = token.Value<string>();
+                    if (!Enum.TryParse(typeof(TEnum), text, ignoreCase: true, out var parsed))
+                        throw new JsonSerializationException($"Unknown {typeof(TEnum).Name} '{text}'.");
+                    
+                    type = (TEnum)parsed;
                     break;
-                }
+                
                 case JTokenType.Integer:
-                {
-                    var i = token.Value<int>();
-                    type = (TEnum)Enum.ToObject(typeof(TEnum), i);
+                    var number = token.Value<int>();
+                    type = (TEnum)Enum.ToObject(typeof(TEnum), number);
                     break;
-                }
+
                 default:
                     throw new JsonSerializationException($"Invalid '{discriminatorName}' token type {token.Type}.");
             }

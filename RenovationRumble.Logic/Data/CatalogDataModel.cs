@@ -8,7 +8,7 @@
     [Serializable]
     public sealed class CatalogDataModel
     {
-        public int CatalogVersion { get; set; }
+        public string CatalogVersion { get; set; }
         
         /// <summary>
         /// Array of all available pieces.
