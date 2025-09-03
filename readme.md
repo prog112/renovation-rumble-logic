@@ -50,7 +50,7 @@ The `GameRunner` holds a simulation context (game state, logger, and data), and 
 
 ### BitMatrix
 
-To make the logic more interesting (and performant), the project introduces a custom `BitMatrix` type: a tightly-packed struct representing shape patterns on a 2D board. It uses a 64-bit ulong to store up to an 8×8 grid in row-major order which results in zero heap allocations and fast bitwise operations.
+To make the logic *a bit* (ha!) more interesting, the project introduces a custom `BitMatrix` type: a tightly-packed struct representing shape patterns on a 2D board. It uses a 64-bit ulong to store up to an 8×8 grid in row-major order which results in zero heap allocations and fast bitwise operations.
 
 It supports efficient transformations like `Rotate`, `Shrink`, `Grow`, and exposes a custom `FilledCells()` struct enumerator for iterating only over the filled cells (without generating any garbage!). This lets command executors check collisions, bounds, and apply effects without having to materialize arrays or allocate memory.
 
