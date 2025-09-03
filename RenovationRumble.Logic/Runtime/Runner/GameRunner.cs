@@ -23,7 +23,9 @@
             };
             
             commandRunner = new CommandRunner();
-            commandRunner.Register(new PlaceExecutor());
+            
+            // Use a Roselyn source generator to register all commands without reflection
+            CommandExecutorRegistry.RegisterAll(commandRunner);
         }
 
         public void StartMatch(MatchDataModel match)

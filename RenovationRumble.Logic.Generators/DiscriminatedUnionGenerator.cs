@@ -3,9 +3,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using Helpers;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     /// <summary>
     /// Scans for base classes annotated with [DiscriminatedUnion()] and generates an appropriate converter.
@@ -13,24 +12,21 @@
     [Generator(LanguageNames.CSharp)]
     public sealed class DiscriminatedUnionGenerator : ISourceGenerator
     {
-        private const string AttributeFullName = "RenovationRumble.Logic.Serialization.DiscriminatedUnionAttribute";
-
         public void Initialize(GeneratorInitializationContext context)
         {
-            context.RegisterForSyntaxNotifications(() => new Receiver());
+            context.RegisterForSyntaxNotifications(() => new ClassCollectorReceiver());
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            if (context.SyntaxReceiver is not Receiver receiver)
+            if (context.SyntaxReceiver is not ClassCollectorReceiver receiver)
                 return;
 
             var compilation = context.Compilation;
-            var attributeSymbol = compilation.GetTypeByMetadataName(AttributeFullName);
+            var attributeSymbol = compilation.GetTypeByMetadataName(ProjectMetadata.DiscriminatedUnionAttribute);
             if (attributeSymbol is null)
                 return;
 
-            // Collect bases (annotated) and all sealed class candidates for subclass discovery
             var bases = new List<(INamedTypeSymbol baseType, INamedTypeSymbol enumType, string enumProperty, string discriminator)>();
             var sealedTypes = new List<INamedTypeSymbol>();
 
@@ -46,14 +42,13 @@
                     continue;
                 }
 
-                // Base candidates: any class with the attribute
                 var attribute = namedType.GetAttributes().FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, attributeSymbol));
                 if (attribute is null)
                     continue;
 
                 if (attribute.ConstructorArguments.Length < 2)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(Diagnostics.InvalidAttributeUsage, Location.None, namedType.ToDisplayString()));
+                    context.ReportDiagnostic(Diagnostic.Create(Diagnostics.InvalidAttributeUsage, RoselynHelper.GetFirstLocation(namedType), namedType.ToDisplayString()));
                     continue;
                 }
 
@@ -63,15 +58,15 @@
 
                 if (enumArg is null)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(Diagnostics.InvalidAttributeUsage, Location.None, namedType.ToDisplayString()));
+                    context.ReportDiagnostic(Diagnostic.Create(Diagnostics.InvalidAttributeUsage, RoselynHelper.GetFirstLocation(namedType), namedType.ToDisplayString()));
                     continue;
                 }
 
                 bases.Add((namedType, enumArg, enumPropName, discriminator));
             }
 
-            // For each base class gather subclasses and emit the helper
             var registryCalls = new List<string>();
+
             foreach (var (baseType, enumType, enumProperty, discriminator) in bases)
             {
                 var pairs = new List<(string enumName, string typeName)>();
@@ -81,21 +76,19 @@
                 {
                     if (subType.IsAbstract)
                         continue;
-                    
-                    if (!InheritsFrom(subType, baseType))
+
+                    if (!RoselynHelper.InheritsFrom(subType, baseType))
                         continue;
 
-                    var (isOk, enumName, diag) = TryGetEnumMemberName(subType, enumType, enumProperty);
-                    if (!isOk)
+                    if (!TryGetEnumMemberName(subType, enumType, enumProperty, out var enumMember, out var diag))
                     {
                         if (diag is not null)
                             diagnostics.Add(diag);
-
                         continue;
                     }
 
                     var typeName = subType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    pairs.Add((enumName, typeName));
+                    pairs.Add((enumMember, typeName));
                 }
 
                 foreach (var duplicate in pairs.GroupBy(p => p.enumName).Where(g => g.Count() > 1))
@@ -114,25 +107,16 @@
                 registryCalls.Add($"{baseType.ContainingNamespace.ToDisplayString()}.Serialization.{baseType.Name}Union.Register");
             }
 
-            // Emit the central registry once
             var registrySource = EmitRegistry(registryCalls);
             context.AddSource("DiscriminatedUnionRegistry.g.cs", registrySource);
         }
 
-        private static bool InheritsFrom(INamedTypeSymbol namedTypeSymbol, INamedTypeSymbol baseType)
+        private static bool TryGetEnumMemberName(INamedTypeSymbol type, INamedTypeSymbol enumType, string enumPropertyName,
+            out string enumMemberName, out Diagnostic diag)
         {
-            for (var current = namedTypeSymbol.BaseType; current is not null; current = current.BaseType)
-            {
-                if (SymbolEqualityComparer.Default.Equals(current, baseType))
-                    return true;
-            }
+            enumMemberName = null;
+            diag = null;
 
-            return false;
-        }
-
-        private static (bool isOk, string enumName, Diagnostic diag) TryGetEnumMemberName(INamedTypeSymbol type, INamedTypeSymbol enumType,
-            string enumPropertyName)
-        {
             // Look for: public override <EnumType> <enumPropertyName> => <EnumType>.<Member>;
             var property = type.GetMembers().OfType<IPropertySymbol>()
                 .FirstOrDefault(p =>
@@ -144,20 +128,18 @@
 
             if (property is null)
             {
-                return (false, null, Diagnostic.Create(Diagnostics.MissingOverride, Location.None, type.ToDisplayString(), enumPropertyName));
+                diag = Diagnostic.Create(Diagnostics.MissingOverride, RoselynHelper.GetFirstLocation(type), type.ToDisplayString(), enumPropertyName);
+                return false;
             }
 
-            var node = property.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+            if (RoselynHelper.TryGetExpressionEnumMemberName(type, enumPropertyName, out var memberName))
+            {
+                enumMemberName = memberName;
+                return true;
+            }
 
-            // Expression-bodied property:  public override Enum Prop => Enum.Member;
-            if (node is PropertyDeclarationSyntax { ExpressionBody.Expression: MemberAccessExpressionSyntax propertySyntax })
-                return (true, propertySyntax.Name.Identifier.Text, null);
-
-            // Accessor with expression body: get => Enum.Member;
-            if (node is AccessorDeclarationSyntax { ExpressionBody.Expression: MemberAccessExpressionSyntax accessorSyntax })
-                return (true, accessorSyntax.Name.Identifier.Text, null);
-
-            return (false, null, Diagnostic.Create(Diagnostics.UnsupportedGetter, Location.None, type.ToDisplayString(), enumPropertyName));
+            diag = Diagnostic.Create(Diagnostics.UnsupportedGetter, RoselynHelper.GetFirstLocation(type), type.ToDisplayString(), enumPropertyName);
+            return false;
         }
 
         private static string EmitPerBaseHelper(INamedTypeSymbol baseType, INamedTypeSymbol enumType, string enumPropertyName, string discriminator,
@@ -186,10 +168,10 @@
             sb.AppendLine($"        public static readonly Dictionary<{enumNameFull}, Func<{baseName}>> Factories =");
             sb.AppendLine($"            new Dictionary<{enumNameFull}, Func<{baseName}>>");
             sb.AppendLine("            {");
-       
+
             foreach (var (name, type) in pairs)
                 sb.AppendLine($"                [{enumNameFull}.{name}] = () => new {type}(),");
-    
+
             sb.AppendLine("            };");
             sb.AppendLine();
             sb.AppendLine($"        public static readonly JsonConverter<{baseName}> Converter =");
@@ -204,7 +186,7 @@
             sb.AppendLine("        }");
             sb.AppendLine("    }");
             sb.AppendLine("}");
-            
+
             return sb.ToString();
         }
 
@@ -223,10 +205,10 @@
             sb.AppendLine("        private static readonly List<Action<JsonSerializerSettings>> _registrars =");
             sb.AppendLine("            new List<Action<JsonSerializerSettings>>");
             sb.AppendLine("            {");
-         
+
             foreach (var call in registerCalls.Distinct())
                 sb.AppendLine($"                s => {call}(s),");
-       
+
             sb.AppendLine("            };");
             sb.AppendLine();
             sb.AppendLine("        public static void RegisterAll(JsonSerializerSettings settings)");
@@ -236,56 +218,8 @@
             sb.AppendLine("        }");
             sb.AppendLine("    }");
             sb.AppendLine("}");
-            
+
             return sb.ToString();
-        }
-
-        private static class Diagnostics
-        {
-            public static readonly DiagnosticDescriptor InvalidAttributeUsage = new(
-                id: "RRGEN100",
-                title: "Invalid JsonDiscriminatedUnion usage",
-                messageFormat: "Type '{0}' has invalid JsonDiscriminatedUnion arguments.",
-                category: "Generation",
-                defaultSeverity: DiagnosticSeverity.Warning,
-                isEnabledByDefault: true);
-
-            public static readonly DiagnosticDescriptor MissingOverride = new(
-                id: "RRGEN101",
-                title: "Subclass must override enum discriminator property",
-                messageFormat: "Type '{0}' must override the enum property specified on the base.",
-                category: "Generation",
-                defaultSeverity: DiagnosticSeverity.Warning,
-                isEnabledByDefault: true);
-
-            public static readonly DiagnosticDescriptor UnsupportedGetter = new(
-                id: "RRGEN102",
-                title: "Unsupported enum property getter",
-                messageFormat: "Type '{0}' has an enum getter the generator cannot evaluate. Use '=> Enum.Member'.",
-                category: "Generation",
-                defaultSeverity: DiagnosticSeverity.Warning,
-                isEnabledByDefault: true);
-
-            public static readonly DiagnosticDescriptor DuplicateEnumValue = new(
-                id: "RRGEN103",
-                title: "Duplicate enum discriminator value",
-                messageFormat: "Enum member '{0}' is assigned to multiple subclasses: {1}",
-                category: "Generation",
-                defaultSeverity: DiagnosticSeverity.Error,
-                isEnabledByDefault: true);
-        }
-
-        private sealed class Receiver : ISyntaxReceiver
-        {
-            public List<ClassDeclarationSyntax> Candidates { get; } = [];
-
-            public void OnVisitSyntaxNode(SyntaxNode node)
-            {
-                if (node is ClassDeclarationSyntax classDeclarationSyntax)
-                {
-                    Candidates.Add(classDeclarationSyntax);
-                }
-            }
         }
     }
 }
