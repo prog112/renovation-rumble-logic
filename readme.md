@@ -46,7 +46,7 @@ This double-layer helps separate validation from mutation.
 
 ### CommandRunner & GameRunner
 
-The `GameRunner` holds a simulation context (game state, logger, and data), and delegates all command application through a `CommandRunner` which resolves the proper executor per type, automatically hooked up via a Roslyn source generator.
+The `GameRunner` is the de-facto starting point, holding a simulation context and delegateing all command execution. Game clients or backend services can simply instantiate a runner instance to start simulating a match. The commands themselves pass then through a `CommandRunner` which resolves the proper executor per type, automatically hooked up via a Roslyn source generator.
 
 ### BitMatrix
 

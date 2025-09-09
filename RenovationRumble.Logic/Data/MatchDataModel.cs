@@ -10,5 +10,10 @@
     {
         public byte BoardWidth { get; set; }
         public byte BoardHeight { get; set; }
+        
+        /// <summary>
+        /// Maps to pieces Unique Id.
+        /// </summary>
+        public ushort[] StartingWheelPieces { get; set; }
     }
 }

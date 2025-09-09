@@ -8,6 +8,7 @@
     using Logger;
     using Primitives;
     using State;
+    using Wheel;
 
     public sealed class GameRunner
     {
@@ -33,7 +34,8 @@
             // Create a new game state
             context.State = new GameState
             {
-                Board = new Board(new Coords(match.BoardWidth, match.BoardHeight))
+                Board = new Board(new Coords(match.BoardWidth, match.BoardHeight)),
+                Wheel = new ChoiceWheel(match.StartingWheelPieces)
             };
         }
         

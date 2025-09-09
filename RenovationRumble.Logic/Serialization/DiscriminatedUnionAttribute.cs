@@ -11,7 +11,7 @@
     {        
         /// <param name="enumType">The enum used as discriminator.</param>
         /// <param name="enumProperty">Name of the base property that returns the enum.</param>
-        /// <param name="discriminator">JSON field name with the default being 'type'.</param>
+        /// <param name="discriminator">Generated field name with the default being 'type'.</param>
         // ReSharper disable UnusedParameter.Local
         public DiscriminatedUnionAttribute(Type enumType, string enumProperty, string discriminator = "type")
         {

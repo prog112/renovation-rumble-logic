@@ -80,10 +80,11 @@
                     if (!RoselynHelper.InheritsFrom(subType, baseType))
                         continue;
 
-                    if (!TryGetEnumMemberName(subType, enumType, enumProperty, out var enumMember, out var diag))
+                    if (!TryGetEnumMemberName(subType, enumType, enumProperty, out var enumMember, out var diagnostic))
                     {
-                        if (diag is not null)
-                            diagnostics.Add(diag);
+                        if (diagnostic is not null)
+                            diagnostics.Add(diagnostic);
+                        
                         continue;
                     }
 

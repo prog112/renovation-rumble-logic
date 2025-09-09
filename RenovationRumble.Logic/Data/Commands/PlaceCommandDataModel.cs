@@ -6,7 +6,7 @@ namespace RenovationRumble.Logic.Data.Commands
     {
         public override Command Command => Command.Place;
         
-        public ushort PieceId { get; set; }
+        public int PieceWheelIndex { get; set; }
         public Coords Position { get; set; }
         public Orientation Orientation { get; set; }
     }

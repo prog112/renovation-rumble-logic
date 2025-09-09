@@ -1,4 +1,4 @@
-﻿namespace RenovationRumble.Logic.Runtime.Board
+﻿namespace RenovationRumble.Logic.Runtime.Catalog
 {
     using System.Collections.Generic;
     using Data;

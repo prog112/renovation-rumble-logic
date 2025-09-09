@@ -9,7 +9,14 @@
     {
         public bool CanApply(in ReadOnlyContext context, PlaceCommandDataModel command)
         {
-            var piece = context.Data.GetPiece(command.PieceId);
+            // Can we even retrieve a piece at this index?
+            if (!context.State.Wheel.Peek(command.PieceWheelIndex, out var pieceId))
+            {
+                context.Logger.LogError($"Cannot access piece at index {command.PieceWheelIndex} in the wheel!");
+                return false;
+            }
+            
+            var piece = context.Data.GetPiece(pieceId);
             var matrix = context.Data.RotationCache.Get(piece, command.Orientation);
             var position = command.Position;
 
@@ -37,7 +44,8 @@
 
         public void Apply(Context context, PlaceCommandDataModel command)
         {
-            var piece = context.Data.GetPiece(command.PieceId);
+            var pieceId = context.State.Wheel.Take(command.PieceWheelIndex);
+            var piece = context.Data.GetPiece(pieceId);
             var matrix = context.Data.RotationCache.Get(piece, command.Orientation);
             var position = command.Position;
 
