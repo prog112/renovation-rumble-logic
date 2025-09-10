@@ -15,7 +15,7 @@ namespace RenovationRumble.Tests
         {
             var place = new PlaceCommandDataModel
             {
-                PieceId = 42,
+                WheelWindowIndex = 1,
                 Position = new Coords(2, 5),
                 Orientation = Orientation.Right
             };
@@ -24,7 +24,7 @@ namespace RenovationRumble.Tests
             var back = _Serializer.Deserialize<CommandDataModel>(json);
 
             var typed = Assert.IsType<PlaceCommandDataModel>(back);
-            Assert.Equal((ushort)42, typed.PieceId);
+            Assert.Equal(1, typed.WheelWindowIndex);
             Assert.Equal(new Coords(2, 5), typed.Position);
             Assert.Equal(Orientation.Right, typed.Orientation);
         }

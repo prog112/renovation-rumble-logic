@@ -11,12 +11,12 @@
         int TotalRemaining { get; }
         bool IsEmpty { get; }
 
-        bool CanTake(int index);
-        bool Peek(int index, out ushort id);
+        bool CanTake(int windowIndex);
+        bool Peek(int windowIndex, out ushort id);
     }
 
     /// <summary>
-    /// Rotating choice window over a queue of pieces. You can take one of the next N items.
+    /// Rotating choice window over a queue of pieces. You can take one of the next <see cref="WindowSize"/> items.
     /// Maps to pieces Unique Id.
     /// </summary>
     public sealed class ChoiceWheel : IReadOnlyChoiceWheel
@@ -24,13 +24,15 @@
         /// <summary>
         /// Current visible window. Nulls can appear if the visible portion has fewer than <see cref="WindowSize"/> elements.
         /// </summary>
-        public ReadOnlyArray<ushort?> Choices => visible.AsReadOnlyArray();
+        public ReadOnlyArray<ushort?> Choices => window.AsReadOnlyArray();
 
         public int TotalRemaining => queue.Count;
         public bool IsEmpty => queue.Count == 0;
 
-        private readonly ushort?[] visible = new ushort?[WindowSize];
+        private readonly ushort?[] window = new ushort?[WindowSize];
         private readonly List<ushort> queue;
+
+        private int headIndex;
 
         public const int WindowSize = 3;
 
@@ -40,20 +42,20 @@
             RefreshWindow();
         }
 
-        public bool CanTake(int index)
+        public bool CanTake(int windowIndex)
         {
-            return index >= 0 && index < WindowSize && queue.Count > index;
+            return windowIndex >= 0 && windowIndex < WindowSize && queue.Count > windowIndex;
         }
 
-        public bool Peek(int index, out ushort id)
+        public bool Peek(int windowIndex, out ushort id)
         {
-            if (!CanTake(index))
+            if (!CanTake(windowIndex))
             {
                 id = default;
                 return false;
             }
 
-            id = queue[index];
+            id = queue[GetQueueIndex(windowIndex)];
             return true;
         }
 
@@ -61,17 +63,20 @@
         /// Takes a piece by index in the current window.
         /// Throws an exception if index is out of range or there is nothing to take.
         /// </summary>
-        public ushort Take(int index)
+        public ushort Take(int windowIndex)
         {
-            if ((uint)index >= WindowSize)
-                throw new ArgumentOutOfRangeException(nameof(index), "Index exceeds the window size.");
+            if (windowIndex < 0 || windowIndex >= WindowSize)
+                throw new ArgumentOutOfRangeException(nameof(windowIndex), $"Index '{windowIndex}' exceeds the window size.");
 
-            if (queue.Count <= index)
-                throw new InvalidOperationException("No piece available at that index.");
+            if (queue.Count <= windowIndex)
+                throw new InvalidOperationException($"Not enough items in the queue to take '{windowIndex}'.");
+            
+            var removeIndex = GetQueueIndex(windowIndex);
 
-            var id = queue[index];
-            queue.RemoveAt(index);
-           
+            var id = queue[removeIndex];
+            queue.RemoveAt(removeIndex);
+
+            headIndex = queue.Count == 0 ? 0 : removeIndex % queue.Count;
             RefreshWindow();
             return id;
         }
@@ -90,10 +95,15 @@
             RefreshWindow();
         }
 
+        private int GetQueueIndex(int windowIndex)
+        {
+            return (headIndex + windowIndex) % queue.Count;
+        }
+
         private void RefreshWindow()
         {
             for (int i = 0; i < WindowSize; i++)
-                visible[i] = i < queue.Count ? queue[i] : (ushort?)null;
+                window[i] = i < queue.Count ? queue[(i + headIndex) % queue.Count] : (ushort?)null;
         }
     }
 }

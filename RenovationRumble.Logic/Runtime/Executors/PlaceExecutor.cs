@@ -10,9 +10,9 @@
         public bool CanApply(in ReadOnlyContext context, PlaceCommandDataModel command)
         {
             // Can we even retrieve a piece at this index?
-            if (!context.State.Wheel.Peek(command.PieceWheelIndex, out var pieceId))
+            if (!context.State.Wheel.Peek(command.WheelWindowIndex, out var pieceId))
             {
-                context.Logger.LogError($"Cannot access piece at index {command.PieceWheelIndex} in the wheel!");
+                context.Logger.LogError($"Cannot access piece at index '{command.WheelWindowIndex}' in the wheel!");
                 return false;
             }
             
@@ -27,14 +27,14 @@
                 // Bounds
                 if (!context.State.Board.IsWithinBounds(cell))
                 {
-                    context.Logger.LogError($"Cell {cell} is out of bounds!");
+                    context.Logger.LogError($"Cell '{cell}' is out of bounds!");
                     return false;
                 }
 
                 // Overlap
                 if (context.State.Board.IsFilled(cell))
                 {
-                    context.Logger.LogError($"Cell {cell} is already occupied!");
+                    context.Logger.LogError($"Cell '{cell}' is already occupied!");
                     return false;
                 }
             }
@@ -44,7 +44,7 @@
 
         public void Apply(Context context, PlaceCommandDataModel command)
         {
-            var pieceId = context.State.Wheel.Take(command.PieceWheelIndex);
+            var pieceId = context.State.Wheel.Take(command.WheelWindowIndex);
             var piece = context.Data.GetPiece(pieceId);
             var matrix = context.Data.RotationCache.Get(piece, command.Orientation);
             var position = command.Position;
