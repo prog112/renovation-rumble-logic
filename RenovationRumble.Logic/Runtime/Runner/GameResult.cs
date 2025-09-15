@@ -1,25 +1,11 @@
 ﻿namespace RenovationRumble.Logic.Runtime.Runner
 {
-    using Rules.EndConditions;
-
     public enum ResultType : byte
     {
         NotStarted = 0,
         InProgress,
         Ended,
         GameError,
-    }
-
-    public readonly struct EndResult
-    {
-        public readonly uint score;
-        public readonly EndReason endReason;
-
-        public EndResult(uint score, EndReason endReason)
-        {
-            this.score = score;
-            this.endReason = endReason;
-        }
     }
 
     public readonly struct GameResult
