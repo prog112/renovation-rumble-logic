@@ -47,13 +47,13 @@
         public CommandResult TryApplyCommand(in Context context, CommandDataModel command)
         {
             if(context == null || context.State == null)
-                return CommandResult.Fail(CommandError.InvalidCommand, "game match not started");
+                return CommandResult.Fail(CommandError.InvalidCommand, "Invalid context/game state!");
             
             if(command == null)
-                return CommandResult.Fail(CommandError.InvalidCommand, "command is null");
+                return CommandResult.Fail(CommandError.InvalidCommand, "Command is null!");
             
             if (!TryResolveAdapter(command.GetType(), out var adapter))
-                return CommandResult.Fail(CommandError.InvalidCommand, "no compatible executor found");
+                return CommandResult.Fail(CommandError.InvalidCommand, "No compatible executor found!");
 
             bool canApply;
             try
@@ -62,7 +62,7 @@
             }
             catch (Exception e)
             {
-                context.Logger.LogError($"Validation exception during command {command.GetType().Name}: {e.Message}");
+                context.Logger.LogError($"Validation exception during command {command.GetType().Name}: {e.Message}.");
                 return CommandResult.Fail(CommandError.ValidationException, e.Message);
             }
             
@@ -75,7 +75,7 @@
             }
             catch (Exception e)
             {
-                context.Logger.LogError($"Execution exception during command {command.GetType().Name}: {e.Message}");
+                context.Logger.LogError($"Execution exception during command {command.GetType().Name}: {e.Message}.");
                 return CommandResult.Fail(CommandError.ApplyException, e.Message);
             }
             

@@ -5,21 +5,21 @@
 
     public interface IReadOnlyBoard
     {
+        Coords Size { get; }
         bool IsFilled(Coords position);
         bool IsWithinBounds(Coords position);
     }
     
     public sealed class Board : IReadOnlyBoard
     {
-        private readonly Coords size;
+        public Coords Size { get; }
         
         private readonly List<BoardPiece> placedPieces;
         private readonly Grid fillMap; // A helper grid array signifying which cell is already filled
         
         public Board(Coords size)
         {
-            this.size = size;
-
+            Size = size;
             placedPieces = new List<BoardPiece>();
             fillMap = new Grid(size.x, size.y);
         }
@@ -31,7 +31,7 @@
         
         public bool IsWithinBounds(Coords position)
         {
-            return position.x < size.x && position.y < size.y;
+            return position.x < Size.x && position.y < Size.y;
         }
 
         public void Fill(Coords position, bool value)
