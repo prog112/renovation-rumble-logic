@@ -48,6 +48,11 @@ This double-layer helps separate validation from mutation.
 
 The `GameRunner` is the de-facto starting point, holding a simulation context and delegateing all command execution. Game clients or backend services can simply instantiate a runner instance to start simulating a match. The commands themselves pass then through a `CommandRunner` which resolves the proper executor per type, automatically hooked up via a Roslyn source generator.
 
+### Validation
+To showcase a practical application of the logic layer, this repo includes a minimal .NET web service `RenovationRumble.Verifier` that exposes a /verify HTTP endpoint. It takes a match state, a list of commands, and a claimed score, then replays the simulation using the same logic as the client to verify the result.
+
+The service returns a structured response indicating whether the match ended correctly, if the score is valid, or if any commands failed. It's stateless, fast, and designed to be run alongside a backend written in any language (`renovation-rumble-backend` will use Node.js), making it easy to plug into real-world async multiplayer flows or anti-cheat systems.
+
 ### BitMatrix
 
 To make the logic *a bit* (ha!) more interesting, the project introduces a custom `BitMatrix` type: a tightly-packed struct representing shape patterns on a 2D board. It uses a 64-bit ulong to store up to an 8×8 grid in row-major order which results in zero heap allocations and fast bitwise operations.
@@ -71,7 +76,6 @@ While the foundation is already set, I have plans for many further additions, e.
 - Special tile mechanics and combos
 - Win condition evaluation
 - Effects, buffs, and status stored in `GameState`
-- Full match replay and score validation flow
 
 All in all, the aim of this is to embody my core architecture philosophy:
 
