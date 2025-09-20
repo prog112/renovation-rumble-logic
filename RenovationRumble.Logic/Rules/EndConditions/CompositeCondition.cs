@@ -1,6 +1,6 @@
 ﻿namespace RenovationRumble.Logic.Rules.EndConditions
 {
-    using RenovationRumble.Logic.Runtime.Runner;
+    using Runtime.Runner;
 
     public sealed class CompositeCondition : IEndCondition
     {

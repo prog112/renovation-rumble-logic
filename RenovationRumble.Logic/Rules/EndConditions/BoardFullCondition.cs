@@ -1,7 +1,7 @@
 ﻿namespace RenovationRumble.Logic.Rules.EndConditions
 {
-    using RenovationRumble.Logic.Primitives;
-    using RenovationRumble.Logic.Runtime.Runner;
+    using Primitives;
+    using Runtime.Runner;
 
     public sealed class BoardFullCondition : IEndCondition
     {

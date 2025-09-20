@@ -3,7 +3,7 @@
     using System;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Primitives; // Coords
+    using Primitives;
 
     /// <summary>
     /// JSON converter for Coords that keeps the struct attribute-free.

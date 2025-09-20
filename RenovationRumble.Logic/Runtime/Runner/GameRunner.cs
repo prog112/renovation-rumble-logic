@@ -74,27 +74,27 @@
                 context.State.Moves++;
         }
 
-        public GameResult Tick()
+        public GameStatus Tick()
         {
             var phase = context.State.Phase;
             if (phase == GamePhase.NotStarted)
-                return GameResult.NotStarted();
+                return GameStatus.NotStarted();
 
             if (!commandResult.isSuccess)
-                return GameResult.Error(commandResult);
+                return GameStatus.Error(commandResult);
 
             if (phase == GamePhase.Ended)
-                return GameResult.Ended(endResult, commandResult);
+                return GameStatus.Ended(endResult, commandResult);
             
             var snapshot = new ReadOnlyContext(context);
             if (phase == GamePhase.InProgress && endCondition.IsGameOver(snapshot, out var reason))
             {
                 endResult = new EndResult(scorer.ComputeScore(snapshot), reason);
                 context.State.Phase = GamePhase.Ended;
-                return GameResult.Ended(endResult, commandResult);
+                return GameStatus.Ended(endResult, commandResult);
             }
 
-            return GameResult.InProgress(commandResult);
+            return GameStatus.InProgress(commandResult);
         }
     }
 }
