@@ -1,6 +1,6 @@
-﻿namespace RenovationRumble.Logic.Rules
+﻿namespace RenovationRumble.Logic.Rules.BitMatrix
 {
-    using Primitives;
+    using RenovationRumble.Logic.Primitives;
 
     /// <summary>
     /// Helper for reasoning about how far a <see cref="BitMatrix"/> can grow along width/height

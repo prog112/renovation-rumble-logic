@@ -49,8 +49,8 @@
             var matrix = context.Data.RotationCache.Get(piece, command.Orientation);
             var position = command.Position;
 
-            context.State.Board.Fill(matrix, position);
             context.State.Board.AddPiece(new BoardPiece(piece, position, command.Orientation, matrix));
+            context.State.Board.Fill(matrix, position);
         }
     }
 }

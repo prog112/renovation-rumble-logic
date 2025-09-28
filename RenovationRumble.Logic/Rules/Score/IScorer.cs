@@ -1,6 +1,6 @@
 ﻿namespace RenovationRumble.Logic.Rules.Score
 {
-    using RenovationRumble.Logic.Runtime.Runner;
+    using Runtime.Runner;
 
     /// <summary>
     /// Computes a score from the provided state.

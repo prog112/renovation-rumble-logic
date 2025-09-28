@@ -1,6 +1,6 @@
-﻿namespace RenovationRumble.Logic.Rules
+﻿namespace RenovationRumble.Logic.Rules.BitMatrix
 {
-    using Primitives;
+    using RenovationRumble.Logic.Primitives;
 
     /// <summary>
     /// Extensions that don't fit the low-level base <see cref="BitMatrix"/> class that is supposed to be design-agnostic.
@@ -97,15 +97,16 @@
         {
             if ((long)(m.w + 1) * m.h > BitMatrix.MaxCells) 
                 return m;
-            
+
             ulong outBits = 0;
             for (var y = 0; y < m.h; y++)
             {
                 var row = (m.bits >> (y * m.w)) & RowMask(m.w);
-                var grown = (row << 1) | 1UL; // Insert 1 at new x=0
+                var leftEdge = row & 1UL; // Old leftmost bit (LSB)
+                var grown = (row << 1) | leftEdge; // Shift and copy edge into new col 0
                 outBits |= grown << (y * (m.w + 1));
             }
-            
+
             return new BitMatrix((byte)(m.w + 1), m.h, outBits);
         }
 
@@ -113,17 +114,19 @@
         {
             if ((long)(m.w + 1) * m.h > BitMatrix.MaxCells)
                 return m;
-           
+
             ulong outBits = 0;
             for (var y = 0; y < m.h; y++)
             {
                 var row = (m.bits >> (y * m.w)) & RowMask(m.w);
-                var grown = row | (1UL << m.w); // Add 1 at new last bit
+                var rightEdge = (row >> (m.w - 1)) & 1UL; // Old rightmost bit (MSB of width w)
+                var grown = row | (rightEdge << m.w); // Copy edge into new last column
                 outBits |= grown << (y * (m.w + 1));
             }
-           
+
             return new BitMatrix((byte)(m.w + 1), m.h, outBits);
         }
+
 
         private static BitMatrix AddRowTop(BitMatrix m)
         {
@@ -131,8 +134,9 @@
                 return m;
             
             ulong outBits = 0;
-            // New top row of 1s
-            outBits |= RowMask(m.w) << 0;
+            // Copy old row top
+            var topRow = m.bits & RowMask(m.w);
+            outBits |= topRow << 0;
             
             // Shift existing rows down by 1
             for (var y = 0; y < m.h; y++)
@@ -157,8 +161,9 @@
                 outBits |= row << (y * m.w);
             }
             
-            // New bottom row of 1s
-            outBits |= RowMask(m.w) << (m.h * m.w);
+            // Copy old bottom row as the new one
+            var bottomRow = (m.bits >> ((m.h - 1) * m.w)) & RowMask(m.w);
+            outBits |= bottomRow << (m.h * m.w); 
             
             return new BitMatrix(m.w, (byte)(m.h + 1), outBits);
         }

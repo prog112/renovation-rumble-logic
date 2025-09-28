@@ -1,7 +1,7 @@
 ﻿namespace RenovationRumble.Tests
 {
-    using RenovationRumble.Logic.Primitives;
-    using RenovationRumble.Logic.Rules;
+    using Logic.Rules.BitMatrix;
+    using Logic.Primitives;
     using Xunit;
     using static BitMatrixTestHelpers;
 
@@ -52,47 +52,47 @@
         }
 
         [Fact]
-        public void AddColumnLeft_InsertsOnesAtNewLeft()
+        public void AddColumnLeft_CopiesLeftEdgeBits()
         {
             var m = Build("010", "001");
             var gr = m.Grow(Edge.Left);
 
             Assert.Equal((byte)4, gr.w);
             Assert.Equal((byte)2, gr.h);
-            Assert.Equal(["1010", "1001"], ExtractRows(gr));
+            Assert.Equal(["0010", "0001"], ExtractRows(gr));
         }
 
         [Fact]
-        public void AddColumnRight_AppendsOnesAtNewRight()
+        public void AddColumnRight_CopiesRightEdgeBits()
         {
             var m = Build("010", "001");
             var gr = m.Grow(Edge.Right);
 
             Assert.Equal((byte)4, gr.w);
             Assert.Equal((byte)2, gr.h);
-            Assert.Equal(["0101", "0011"], ExtractRows(gr));
+            Assert.Equal(["0100", "0011"], ExtractRows(gr));
         }
 
         [Fact]
-        public void AddRowTop_InsertsRowOfOnes()
+        public void AddRowTop_CopiesTopRow()
         {
             var m = Build("010", "001");
             var gr = m.Grow(Edge.Top);
 
             Assert.Equal((byte)3, gr.w);
             Assert.Equal((byte)3, gr.h);
-            Assert.Equal(["111", "010", "001"], ExtractRows(gr));
+            Assert.Equal(["010", "010", "001"], ExtractRows(gr));
         }
 
         [Fact]
-        public void AddRowBottom_AppendsRowOfOnes()
+        public void AddRowBottom_CopiesBottomRow()
         {
             var m = Build("010", "001");
             var gr = m.Grow(Edge.Bottom);
 
             Assert.Equal((byte)3, gr.w);
             Assert.Equal((byte)3, gr.h);
-            Assert.Equal(["010", "001", "111"], ExtractRows(gr));
+            Assert.Equal(["010", "001", "001"], ExtractRows(gr));
         }
 
         [Fact]
