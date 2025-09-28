@@ -41,9 +41,9 @@
             // Clear the old piece
             context.State.Board.Fill(matrix, piece.coords, false);
 
-            // Compute new matrix and updated coords (if applicable)
+            // Compute new matrix and updated coords
             var newMatrix = matrix.Shrink(command.Edge);
-            var newCoords = DetermineNewPiecePosition(command, piece, matrix, newMatrix);
+            var newCoords = DetermineNewPiecePosition(command, piece);
 
             // Replace and apply new piece
             var newPiece = new BoardPiece(piece.dataModel, newCoords, piece.orientation, newMatrix);
@@ -51,17 +51,16 @@
             context.State.Board.Fill(newMatrix, newCoords);
         }
 
-        private static Coords DetermineNewPiecePosition(ShrinkCommandDataModel command, BoardPiece piece, BitMatrix oldMatrix, BitMatrix newMatrix)
+        private static Coords DetermineNewPiecePosition(ShrinkCommandDataModel command, BoardPiece piece)
         {
-            var coords = piece.coords;
-
-            if (command.Edge == Edge.Left && newMatrix.w < oldMatrix.w)
-                return new Coords(coords.x + 1, coords.y);
-
-            if (command.Edge == Edge.Top && newMatrix.h < oldMatrix.h)
-                return new Coords(coords.x, coords.y + 1);
-
-            return coords;
+            // Coords relate to the top left corner of the piece
+            // No need to modify it if the bottom/right edge is grown
+            return command.Edge switch
+            {
+                Edge.Left => new Coords(piece.coords.x + 1, piece.coords.y),
+                Edge.Top => new Coords(piece.coords.x, piece.coords.y + 1),
+                _ => piece.coords
+            };
         }
     }
 }

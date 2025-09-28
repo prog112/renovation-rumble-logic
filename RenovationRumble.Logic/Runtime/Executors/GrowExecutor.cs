@@ -69,9 +69,10 @@
             
             // Clear the old piece
             context.State.Board.Fill(matrix, piece.coords, false);
-            
-            var newCoords = DetermineNewPiecePosition(command, piece);
+
+            // Compute new matrix and updated coords            
             var newMatrix = matrix.Grow(command.Edge);
+            var newCoords = DetermineNewPiecePosition(command, piece);
             
             // Replace the piece & apply the new matrix to the board
             var newPiece = new BoardPiece(piece.dataModel, newCoords, piece.orientation, newMatrix);
