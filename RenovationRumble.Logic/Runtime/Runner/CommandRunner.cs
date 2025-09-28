@@ -62,7 +62,7 @@
             }
             catch (Exception e)
             {
-                context.Logger.LogError($"Validation exception during command {command.GetType().Name}: {e.Message}.");
+                context.Logger.LogError($"Validation exception during command {command.GetType().Name}: {e}.");
                 return CommandResult.Fail(CommandError.ValidationException, e.Message);
             }
             
@@ -75,7 +75,7 @@
             }
             catch (Exception e)
             {
-                context.Logger.LogError($"Execution exception during command {command.GetType().Name}: {e.Message}.");
+                context.Logger.LogError($"Execution exception during command {command.GetType().Name}: {e}.");
                 return CommandResult.Fail(CommandError.ApplyException, e.Message);
             }
             
